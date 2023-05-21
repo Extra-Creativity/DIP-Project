@@ -1,0 +1,6 @@
+[submodule "NeRF"]
+	path = NeRF
+	url = https://github.com/yenchenlin/nerf-pytorch.git
+[submodule "Render"]
+	path = Render
+	url = https://github.com/Extra-Creativity/OpenGLFramework.git
