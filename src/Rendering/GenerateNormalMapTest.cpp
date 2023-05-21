@@ -19,10 +19,10 @@ int main()
     auto& mainWindow = loader.GetMainWindowInstance();
 
     auto& model = loader.GetModel("sucrose");
-    model.transform.scale = { 0.1, 0.1, 0.1 };
+    model.transform.scale = { 0.125, 0.125, 0.125 };
 
     auto& shader = loader.GetShader("gen_norm");
-	Core::Camera camera{ { 0, 1, 3.5}, {0, 1, 0}, {0, 0, -1} };
+	Core::Camera camera{ { 0, 1.25, 3.5}, {0, 1, 0}, {0, 0, -1} };
 
     float near = 0.1f, far = 100.0f;
     mainWindow.Register([&](){
@@ -34,6 +34,31 @@ int main()
                       near, far, camera, shader);
         model.Draw(shader);
     });
-    mainWindow.MainLoop({0.0, 0.0, 0.0, 1.0});
+
+    std::filesystem::create_directories("GenMapTestResult");
+    mainWindow.Register([&]{
+        static int time = 0;
+        static int maxTime = 30, timeSegment = 3;
+        if(time == maxTime * timeSegment){
+            mainWindow.Close();
+        }
+        int segment = time / maxTime;
+        camera.RotateAroundCenter(360 / maxTime, 
+                {0, camera.GetPosition().y, 0}, {0, 1, 0});
+        if(time % maxTime != 0)
+        {
+            mainWindow.SaveImage("GenMapTestResult/" + 
+                                 std::to_string(time) + ".png");
+        }
+        else if(segment == 1){
+            camera.RotateAroundCenter(30, {1, 0, 0}, {0, 1, 0});
+        }
+        else if(segment == 2){
+            camera.RotateAroundCenter(-60, {1, 0, 0}, {0, 1, 0});
+        }
+        time++;
+    });
+    
+    mainWindow.MainLoop({1.0, 1.0, 1.0, 1.0});
     return 0;
 }
