@@ -1,3 +1,6 @@
 build/
 .xmake/
 .vscode/
+log.txt
+src/Rendering/config/DataTransfer/buffer.png
+*.mp4

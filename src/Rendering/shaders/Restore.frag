@@ -8,19 +8,21 @@ in vec2 texCoords;
 out vec4 FragColor;
 
 vec3 ColorToNorm(vec3 color)
-{        
+{
     return normalize(color * 4 - 3);
 }
 
 void main()
 {
     vec3 color = vec3(texture(normalTexture, texCoords));
-    if(color == vec3(0)){
+    if(any(lessThan(color, vec3(0.1, 0.1, 0.1)))){
         FragColor = vec4(1, 1, 1, 0);
     }
     else{
+        vec2 offset = texCoords - vec2(0.5, 0.5);
+        vec3 approxIncident = normalize(incident + vec3(offset, 0));
         vec3 normal = ColorToNorm(color);
-        vec3 reflection = reflect(incident, normal);
+        vec3 reflection = reflect(approxIncident, normal);
         FragColor = vec4(texture(skybox, reflection).rgb, 1.0);
     }
     return;
