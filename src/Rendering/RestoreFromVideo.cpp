@@ -67,9 +67,14 @@ int main(int argc, char* argv[])
     const auto[width, height] = GetWidthAndHeight();
     Core::Framebuffer buffer{ width, height };
     
-    Core::SkyBoxTexture skybox{ 
-        std::filesystem::path{ MODEL_DIR } / file.rootSection("skybox"),
-        Core::SkyBoxTexture::TextureSegmentType::HorizontalLeft };
+    Core::SkyBoxTexture skybox = file.rootSection("option") == "split" ? 
+        Core::SkyBoxTexture { 
+            std::filesystem::path{ MODEL_DIR } / file.rootSection("skybox_split")
+        } : Core::SkyBoxTexture{ 
+            std::filesystem::path{ MODEL_DIR } / file.rootSection("skybox_total"),
+            Core::SkyBoxTexture::TextureSegmentType::HorizontalLeft
+        };
+    
     Core::BasicTriRenderModel model{ 
         std::filesystem::path{ MODEL_DIR } / file.rootSection("plane") };
     
@@ -90,7 +95,7 @@ int main(int argc, char* argv[])
             return;
         }
         Core::Camera camera{ {0, 0, 0}, {0, 1, 0}, {0, 0, -1}};
-        camera.Rotate(glm::toQuat(poseMat));
+        camera.Rotate(glm::inverse(glm::toQuat(poseMat)));
         glm::vec3 incident = camera.GetGaze();
 
         Core::Texture texture{ bufferPath };
@@ -115,7 +120,10 @@ int main(int argc, char* argv[])
             width, height, channelNum);
         stbi_write_jpg(bufferPath.c_str(), width, height, channelNum, 
             pixelBuffer.data(), 95);
+    });
 
+    mainWindow.Register([&](){
+        // To make CPUTexture free the path so that the permission is right.
         std::cout << "Done." << std::endl;
     });
 

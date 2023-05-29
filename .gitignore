@@ -3,4 +3,7 @@ build/
 .vscode/
 log.txt
 src/Rendering/config/DataTransfer/buffer.png
+src/Stereo/data/
+src/Stereo/result/
 *.mp4
+*.asv

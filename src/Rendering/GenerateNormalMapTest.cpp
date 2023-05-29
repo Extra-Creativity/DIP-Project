@@ -1,6 +1,12 @@
 #include "FrameworkCore/Core_All.h"
 #include "AssetLoader.h"
 
+#ifdef EFFECT_PREVIEW
+#include <thread>
+#include <chrono>
+using namespace std::literals;
+#endif
+
 using namespace OpenGLFramework;
 
 void SetProjection(float width, float height, float near, float far, 
@@ -10,6 +16,41 @@ void SetProjection(float width, float height, float near, float far,
 		width / height, near, far);
 	shader.SetMat4("projection", projectionMat);
 	return;
+}
+
+void AllViewsCapture(Core::MainWindow& mainWindow, Core::Camera& camera,
+    float totalRotationAngle = 360, int totalTime = 30, int beginID = 0)
+{
+    mainWindow.Register([totalRotationAngle, totalTime,
+        beginID, &mainWindow, &camera]{
+        static Core::Camera savedCamera = camera;
+        static int time = 0;
+        static int maxTime = totalTime, timeSegment = 3;
+        if(time == maxTime * timeSegment){
+            mainWindow.Close();
+        }
+        int segment = time / maxTime;
+        camera.RotateAroundCenter(totalRotationAngle / maxTime, 
+                {0, camera.GetPosition().y, 0}, {0, 1, 0});
+        if(time % maxTime != 0)
+        {
+#ifdef EFFECT_PREVIEW
+            std::this_thread::sleep_for(100ms);
+#else
+            mainWindow.SaveImage("GenMapTestResult/" + 
+                                 std::to_string(time + beginID) + ".png");
+#endif
+        }
+        else if(segment == 1){
+            camera = savedCamera;
+            camera.RotateAroundCenter(30, {1, 0, 0}, {0, 1, 0});
+        }
+        else if(segment == 2){
+            camera = savedCamera;
+            camera.RotateAroundCenter(-30, {1, 0, 0}, {0, 1, 0});
+        }
+        time++;
+    });
 }
 
 int main()
@@ -36,29 +77,9 @@ int main()
     });
 
     std::filesystem::create_directories("GenMapTestResult");
-    mainWindow.Register([&]{
-        static int time = 0;
-        static int maxTime = 30, timeSegment = 3;
-        if(time == maxTime * timeSegment){
-            mainWindow.Close();
-        }
-        int segment = time / maxTime;
-        camera.RotateAroundCenter(360 / maxTime, 
-                {0, camera.GetPosition().y, 0}, {0, 1, 0});
-        if(time % maxTime != 0)
-        {
-            mainWindow.SaveImage("GenMapTestResult/" + 
-                                 std::to_string(time) + ".png");
-        }
-        else if(segment == 1){
-            camera.RotateAroundCenter(30, {1, 0, 0}, {0, 1, 0});
-        }
-        else if(segment == 2){
-            camera.RotateAroundCenter(-60, {1, 0, 0}, {0, 1, 0});
-        }
-        time++;
-    });
-    
-    mainWindow.MainLoop({1.0, 1.0, 1.0, 1.0});
+    // AllViewsCapture(mainWindow, camera);
+    AllViewsCapture(mainWindow, camera, -30, 10, 30);
+
+    mainWindow.MainLoop({0.0, 0.0, 0.0, 0.0});
     return 0;
 }

@@ -19,8 +19,7 @@ void main()
         FragColor = vec4(1, 1, 1, 0);
     }
     else{
-        vec2 offset = texCoords - vec2(0.5, 0.5);
-        vec3 approxIncident = normalize(incident + vec3(offset, 0));
+        vec3 approxIncident = normalize(incident);
         vec3 normal = ColorToNorm(color);
         vec3 reflection = reflect(approxIncident, normal);
         FragColor = vec4(texture(skybox, reflection).rgb, 1.0);

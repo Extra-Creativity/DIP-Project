@@ -8,7 +8,7 @@ int main()
     IOExtension::IniFile file{ CONFIG_PATH };
     [[maybe_unused]] auto& manager = Core::ContextManager::GetInstance();
 
-    Core::MainWindow mainWindow{80, 128, "test"};
+    Core::MainWindow mainWindow{600, 1000, "test"};
     
     Core::Texture texture{ 
         std::filesystem::path{ MODEL_DIR } / file.rootSection("test_texture")};
